@@ -43,4 +43,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.updateTradeLink(user, request.tradeLink()));
 
     }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @RequestBody
+            @Valid LogoutRequest request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
+    }
 }

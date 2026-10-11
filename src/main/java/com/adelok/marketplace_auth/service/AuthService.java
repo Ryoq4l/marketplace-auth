@@ -43,4 +43,8 @@ public class AuthService {
         userRepository.save(user);
         return new UserResponse(user.getId(), user.getSteamId(), user.getRole(), user.getTradeLink());
     }
+    @Transactional
+    public void logout(String refreshToken){
+        refreshTokenService.revoke(refreshToken);
+    }
 }
