@@ -7,6 +7,7 @@ import java.util.UUID;
 public record UserResponse (
         UUID id,
         String steamId,
-        Role role
+        Role role,
+        String tradeLink
 ){
 }
