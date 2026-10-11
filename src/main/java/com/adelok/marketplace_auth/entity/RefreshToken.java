@@ -34,7 +34,7 @@ public class RefreshToken {
 
     @Builder.Default
     @Column(name = "revoked", nullable = false)
-    private boolean revoked = false;
+    private boolean isRevoked = false;
 
 
 }
