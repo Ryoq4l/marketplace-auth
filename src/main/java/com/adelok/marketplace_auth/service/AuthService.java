@@ -26,7 +26,7 @@ public class AuthService {
                 .orElseGet(() -> userRepository.saveAndFlush(User.builder().steamId(steamId).build()));
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = refreshTokenService.create(user);
-        UserResponse userResponse = new UserResponse(user.getId(), user.getSteamId(), user.getRole());
+        UserResponse userResponse = new UserResponse(user.getId(), user.getSteamId(), user.getRole(), user.getTradeLink());
         return new LoginResponse(accessToken, refreshToken, userResponse);
     }
 
@@ -36,5 +36,15 @@ public class AuthService {
         User user = token.getUser();
         String access = jwtService.generateAccessToken(user);
         return new RefreshResponse(access);
+    }
+    @Transactional
+    public UserResponse updateTradeLink(User user, String tradeLink){
+        user.setTradeLink(tradeLink);
+        userRepository.save(user);
+        return new UserResponse(user.getId(), user.getSteamId(), user.getRole(), user.getTradeLink());
+    }
+    @Transactional
+    public void logout(String refreshToken){
+        refreshTokenService.revoke(refreshToken);
     }
 }

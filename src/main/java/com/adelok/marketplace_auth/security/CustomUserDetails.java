@@ -18,6 +18,11 @@ public class CustomUserDetails implements UserDetails {
         SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority);
         return List.of(grantedAuthority);
     }
+
+    public User getUser() {
+        return user;
+    }
+
     public String getPassword(){
         return user.getPasswordHash();
     }

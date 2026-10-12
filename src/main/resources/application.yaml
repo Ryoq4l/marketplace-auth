@@ -1,16 +1,35 @@
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          steam:
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            client-id: steam-auth-client
+            client-secret: 5fdFDF0sd09dd99ssfs09FGS
+            provider: steam-provider
+            scope: openid, profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          steam-provider:
+            authorization-uri: http://localhost:19000/authorize
+            token-uri: http://steam-auth-proxy:19000/token
+            user-info-uri: http://steam-auth-proxy:19000/userinfo
+            jwk-set-uri: http://steam-auth-proxy:19000/.well-known/jwks.json
+            user-name-attribute: sub
   application:
     name: marketplace-auth
 
   datasource:
-    url: jdbc:mysql://127.0.1.31:3306/auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:auth_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER:market_user}
+    password: ${DB_PASSWORD:market_pass}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: ${DDL_AUTO:update}
     show-sql: true
     properties:
       hibernate:
@@ -21,14 +40,14 @@ server:
   port: 8081
 
 jwt:
-  secret: change-me-to-a-long-random-string-at-least-32-chars
+  secret: ${JWT_SECRET:a9D2fG7hJ4kL1mN6pQ3rS8tU5vW0xY2z}
   access-token-expiration: 900000
   refresh-token-expiration: 604800000
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
     register-with-eureka: true
     fetch-registry: true
   instance:

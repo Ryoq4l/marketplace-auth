@@ -1,17 +1,14 @@
 package com.adelok.marketplace_auth.controller;
 
-import com.adelok.marketplace_auth.dto.LoginRequest;
-import com.adelok.marketplace_auth.dto.LoginResponse;
-import com.adelok.marketplace_auth.dto.RefreshRequest;
-import com.adelok.marketplace_auth.dto.RefreshResponse;
+import com.adelok.marketplace_auth.dto.*;
+import com.adelok.marketplace_auth.entity.User;
+import com.adelok.marketplace_auth.security.CustomUserDetails;
 import com.adelok.marketplace_auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,5 +30,24 @@ public class AuthController {
             @Valid RefreshRequest request
     ) {
         return ResponseEntity.ok(authService.refresh(request.refreshToken()));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<UserResponse> updateTradelink(
+            @RequestBody
+            @Valid UpdateProfileRequest request
+    ) {
+        CustomUserDetails userDetails = (CustomUserDetails)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        return ResponseEntity.ok(authService.updateTradeLink(user, request.tradeLink()));
+
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @RequestBody
+            @Valid LogoutRequest request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 }
