@@ -1,5 +1,6 @@
 package com.adelok.marketplace_auth.service;
 
+import com.adelok.marketplace_auth.client.WalletClient;
 import com.adelok.marketplace_auth.dto.LoginResponse;
 import com.adelok.marketplace_auth.dto.RefreshResponse;
 import com.adelok.marketplace_auth.dto.UserResponse;
@@ -8,22 +9,32 @@ import com.adelok.marketplace_auth.entity.User;
 import com.adelok.marketplace_auth.repository.UserRepository;
 import com.adelok.marketplace_auth.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final WalletClient walletClient;
 
     @Transactional
     public LoginResponse loginOrRegisterBySteamId(String steamId) {
         if (steamId == null || steamId.isBlank()) throw new IllegalArgumentException("steamid is required");
         User user = userRepository.findBySteamId(steamId)
-                .orElseGet(() -> userRepository.saveAndFlush(User.builder().steamId(steamId).build()));
+                .orElseGet(() -> {
+                    User newUser = userRepository.saveAndFlush(User.builder().steamId(steamId).build());
+                    try {
+                        walletClient.createWallet(new WalletClient.CreateWalletRequest(newUser.getId()));
+                    } catch (Exception e) {
+                        log.error("Failed to create wallet for user {}", newUser.getId(), e);
+                    }
+                    return newUser;
+                });
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = refreshTokenService.create(user);
         UserResponse userResponse = new UserResponse(user.getId(), user.getSteamId(), user.getRole(), user.getTradeLink());
@@ -37,14 +48,16 @@ public class AuthService {
         String access = jwtService.generateAccessToken(user);
         return new RefreshResponse(access);
     }
+
     @Transactional
-    public UserResponse updateTradeLink(User user, String tradeLink){
+    public UserResponse updateTradeLink(User user, String tradeLink) {
         user.setTradeLink(tradeLink);
         userRepository.save(user);
         return new UserResponse(user.getId(), user.getSteamId(), user.getRole(), user.getTradeLink());
     }
+
     @Transactional
-    public void logout(String refreshToken){
+    public void logout(String refreshToken) {
         refreshTokenService.revoke(refreshToken);
     }
 }
