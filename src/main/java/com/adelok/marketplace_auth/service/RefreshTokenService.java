@@ -3,7 +3,7 @@ package com.adelok.marketplace_auth.service;
 import com.adelok.marketplace_auth.config.JwtProperties;
 import com.adelok.marketplace_auth.entity.RefreshToken;
 import com.adelok.marketplace_auth.entity.User;
-import com.adelok.marketplace_auth.exceptions.InvalidTokenException;
+import org.adelok.common.exception.InvalidTokenException;
 import com.adelok.marketplace_auth.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
